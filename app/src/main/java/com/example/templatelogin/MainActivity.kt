@@ -1,9 +1,7 @@
 package com.example.templatelogin
 
 import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,34 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import com.example.templatelogin.ui.theme.TemplateLoginTheme
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -54,17 +32,34 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.templatelogin.ui.theme.TemplateLoginTheme
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -87,8 +82,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("register") {
-                            App(
-
+                            RegisterScreen(
+                                onRegisterComplete = {
+                                    navController.navigate("login")
+                                },
+                                onLoginClick = {
+                                    navController.navigate("login")
+                                }
                             )
                         }
                         composable(
@@ -109,128 +109,27 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun App() {
+fun RegisterScreen(
+    onRegisterComplete: () -> Unit,
+    onLoginClick: () -> Unit
+) {
     var nome by remember { mutableStateOf("") }
     var apelido by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var telefone by remember { mutableStateOf("") }
-    var mostrarRegistros by remember { mutableStateOf(false) }
-    val banco = remember { mutableStateListOf<Map<String, Any>>() }
-    val scrollState = rememberScrollState()
-    val backgroundColor = Color(0xFF121212)
-    val fieldBackground = Color(0xFF1E1E1E)
+    var mostrarSenha by remember { mutableStateOf(false) }
+
+    // Cores do tema
+    val primaryColor = Color(0xFF4CAF50) // Verde claro
+    val primaryDarkColor = Color(0xFF388E3C) // Verde mais escuro para gradiente
     val textColor = Color.White
-    val labelColor = Color.Gray
-    val primaryColor = Color(0xFF5EA500) // Nova cor verde
+    val cardBackground = Color.White
+    val textColorDark = Color(0xFF333333)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .background(backgroundColor)
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(
-            "Registro Hick1lugar",
-            fontFamily = FontFamily.Cursive,
-            fontSize = 26.sp,
-            color = primaryColor, // Alterado para a nova cor
-            modifier = Modifier.padding(vertical = 24.dp)
-        )
-
-        CustomDarkTextField(value = nome, onValueChange = { nome = it }, label = "Nome", fieldBackground, textColor, labelColor)
-        CustomDarkTextField(value = apelido, onValueChange = { apelido = it }, label = "Nickname", fieldBackground, textColor, labelColor)
-        CustomDarkTextField(value = email, onValueChange = { email = it }, label = "E-mail", fieldBackground, textColor, labelColor)
-        CustomDarkTextField(value = senha, onValueChange = { senha = it }, label = "Senha", backgroundColor = fieldBackground, textColor = textColor, labelColor = labelColor, isPassword = true)
-        CustomDarkTextField(value = telefone, onValueChange = { telefone = it }, label = "Telefone", fieldBackground, textColor, labelColor)
-
-        Button(
-            onClick = {
-                val banco = hashMapOf(
-                    "nome" to nome,
-                    "apelido" to apelido,
-                    "email" to email,
-                    "senha" to senha,
-                    "telefone" to telefone,
-                )
-
-
-
-                nome = ""
-                apelido = ""
-                email = ""
-                senha = ""
-                telefone = ""
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = primaryColor), // Alterado para a nova cor
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Text("Cadastrar", fontSize = 18.sp, color = Color.White)
-        }
-
-        Button(
-            onClick = {
-                if (!mostrarRegistros) {
-                } else {
-                    mostrarRegistros = false
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = primaryColor), // Alterado para a nova cor
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Text(
-                if (mostrarRegistros) "Ocultar registros" else "Exibir todos os registros",
-                fontSize = 18.sp,
-                color = Color.White
-            )
-        }
-
-        if (mostrarRegistros) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp)
-            ) {
-                banco.forEachIndexed { index, banco ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color(0xFF2C2C2C), shape = RoundedCornerShape(8.dp))
-                            .padding(12.dp)
-                    ) {
-                        Text("Registro ${index + 1}", color = primaryColor, fontSize = 18.sp) // Alterado para a nova cor
-                        Text("Nome: ${banco["nome"]}", color = Color.White)
-                        Text("Apelido: ${banco["apelido"]}", color = Color.White)
-                        Text("Email: ${banco["email"]}", color = Color.White)
-                        Text("Senha: ${banco["senha"]}", color = Color.White)
-                        Text("Telefone: ${banco["telefone"]}", color = Color.White)
-                    }
-                }
-
-            }
-        }
-    }
-}
-
-@Composable
-fun RegisterScreen(onRegisterComplete: () -> Unit) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-
+    // Gradiente de fundo vertical
     val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF2196F3), Color(0xFF1976D2))
+        colors = listOf(primaryColor, primaryDarkColor)
     )
 
     Box(
@@ -243,9 +142,10 @@ fun RegisterScreen(onRegisterComplete: () -> Unit) {
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(0.9f)
-                .wrapContentHeight(),
+                .verticalScroll(rememberScrollState()),
             shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(12.dp)
+            elevation = CardDefaults.cardElevation(12.dp),
+            colors = CardDefaults.cardColors(containerColor = cardBackground)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -263,16 +163,43 @@ fun RegisterScreen(onRegisterComplete: () -> Unit) {
                     text = "Cadastro",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1976D2)
+                    color = primaryColor
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Nome de usuário") },
-                    modifier = Modifier.fillMaxWidth()
+                    value = nome,
+                    onValueChange = { nome = it },
+                    label = { Text("Nome completo") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = cardBackground,
+                        unfocusedContainerColor = cardBackground,
+                        focusedTextColor = textColorDark,
+                        unfocusedTextColor = textColorDark,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = apelido,
+                    onValueChange = { apelido = it },
+                    label = { Text("Apelido/Nickname") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = cardBackground,
+                        unfocusedContainerColor = cardBackground,
+                        focusedTextColor = textColorDark,
+                        unfocusedTextColor = textColorDark,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -282,29 +209,66 @@ fun RegisterScreen(onRegisterComplete: () -> Unit) {
                     onValueChange = { email = it },
                     label = { Text("E-mail") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = cardBackground,
+                        unfocusedContainerColor = cardBackground,
+                        focusedTextColor = textColorDark,
+                        unfocusedTextColor = textColorDark,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = senha,
+                    onValueChange = { senha = it },
                     label = { Text("Senha") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (mostrarSenha) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        IconButton(onClick = { mostrarSenha = !mostrarSenha }) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (mostrarSenha) R.drawable.logo_background else R.drawable.logo_background
+                                ),
+                                contentDescription = "Toggle password visibility",
+                                tint = primaryColor
+                            )
+                        }
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = cardBackground,
+                        unfocusedContainerColor = cardBackground,
+                        focusedTextColor = textColorDark,
+                        unfocusedTextColor = textColorDark,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
-                    value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
-                    label = { Text("Confirmar senha") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    value = telefone,
+                    onValueChange = { telefone = it },
+                    label = { Text("Telefone") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = cardBackground,
+                        unfocusedContainerColor = cardBackground,
+                        focusedTextColor = textColorDark,
+                        unfocusedTextColor = textColorDark,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -317,8 +281,8 @@ fun RegisterScreen(onRegisterComplete: () -> Unit) {
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1976D2),
-                        contentColor = Color.White
+                        containerColor = primaryColor,
+                        contentColor = textColor
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -328,11 +292,11 @@ fun RegisterScreen(onRegisterComplete: () -> Unit) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 TextButton(onClick = {
-                    onRegisterComplete()
+                    onLoginClick()
                 }) {
                     Text(
                         "Já tem uma conta? Faça login",
-                        color = Color(0xFF1976D2),
+                        color = primaryColor,
                         fontSize = 14.sp
                     )
                 }
@@ -345,9 +309,14 @@ fun RegisterScreen(onRegisterComplete: () -> Unit) {
 fun HomeScreen(userName: String = "Usuário") {
     var menuExpanded by remember { mutableStateOf(false) }
 
+    // Cores do tema
+    val primaryColor = Color(0xFF4CAF50) // Verde claro
+    val primaryDarkColor = Color(0xFF388E3C) // Verde mais escuro para gradiente
+    val textColor = Color.White
+
     // Gradiente de fundo vertical
     val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF2196F3), Color(0xFF1976D2))
+        colors = listOf(primaryColor, primaryDarkColor)
     )
 
     Box(
@@ -368,7 +337,7 @@ fun HomeScreen(userName: String = "Usuário") {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Menu",
-                        tint = Color.White
+                        tint = textColor
                     )
                 }
 
@@ -378,32 +347,20 @@ fun HomeScreen(userName: String = "Usuário") {
                 ) {
                     DropdownMenuItem(
                         text = { Text("Cadastrar Produto") },
-                        onClick = {
-                            menuExpanded = false
-                            // ação de navegação ou lógica
-                        }
+                        onClick = { menuExpanded = false }
                     )
                     DropdownMenuItem(
                         text = { Text("Listar Produto") },
-                        onClick = {
-                            menuExpanded = false
-                            // ação de navegação ou lógica
-                        }
+                        onClick = { menuExpanded = false }
                     )
                     DropdownMenuItem(
                         text = { Text("Perfil de $userName") },
-                        onClick = {
-                            menuExpanded = false
-                            // ação de navegação ou lógica
-                        }
+                        onClick = { menuExpanded = false }
                     )
                     Divider()
                     DropdownMenuItem(
                         text = { Text("Deslogar") },
-                        onClick = {
-                            menuExpanded = false
-                            // ação de logout
-                        }
+                        onClick = { menuExpanded = false }
                     )
                 }
             }
@@ -416,7 +373,8 @@ fun HomeScreen(userName: String = "Usuário") {
                 .fillMaxWidth(0.9f)
                 .fillMaxSize(),
             shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(12.dp)
+            elevation = CardDefaults.cardElevation(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -434,7 +392,7 @@ fun HomeScreen(userName: String = "Usuário") {
                     text = "Bem-vindo, $userName!",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1976D2),
+                    color = primaryColor,
                     textAlign = TextAlign.Center
                 )
 
@@ -452,45 +410,21 @@ fun HomeScreen(userName: String = "Usuário") {
 }
 
 @Composable
-fun CustomDarkTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    backgroundColor: Color,
-    textColor: Color,
-    labelColor: Color,
-    isPassword: Boolean = false
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label, color = labelColor) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = backgroundColor,
-            unfocusedContainerColor = backgroundColor,
-            focusedTextColor = textColor,
-            unfocusedTextColor = textColor,
-            cursorColor = Color(0xFF5EA500), // Alterado para a nova cor
-            focusedLabelColor = labelColor,
-            unfocusedLabelColor = labelColor,
-            focusedIndicatorColor = Color(0xFF5EA500), // Adicionado - cor do indicador quando focado
-            unfocusedIndicatorColor = Color.Gray // Adicionado - cor do indicador quando não focado
-        )
-    )
-}
-
-@Composable
 fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
     var user by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var mostrarSenha by remember { mutableStateOf(false) }
+
+    // Cores do tema
+    val primaryColor = Color(0xFF4CAF50) // Verde claro
+    val primaryDarkColor = Color(0xFF388E3C) // Verde mais escuro para gradiente
+    val textColor = Color.White
+    val cardBackground = Color.White
+    val textColorDark = Color(0xFF333333)
 
     // Gradiente de fundo vertical
     val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF2196F3), Color(0xFF1976D2))
+        colors = listOf(primaryColor, primaryDarkColor)
     )
 
     Box(
@@ -506,14 +440,15 @@ fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
                 .fillMaxWidth(0.9f)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(12.dp)
+            elevation = CardDefaults.cardElevation(12.dp),
+            colors = CardDefaults.cardColors(containerColor = cardBackground)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(24.dp)
             ) {
-                // Logo (substitua pela sua imagem)
+                // Logo
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo",
@@ -526,7 +461,7 @@ fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
                     text = "App Login",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1976D2)
+                    color = primaryColor
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -536,7 +471,16 @@ fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
                     value = user,
                     onValueChange = { user = it },
                     label = { Text("Usuário") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = cardBackground,
+                        unfocusedContainerColor = cardBackground,
+                        focusedTextColor = textColorDark,
+                        unfocusedTextColor = textColorDark,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -546,9 +490,29 @@ fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Senha") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (mostrarSenha) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        IconButton(onClick = { mostrarSenha = !mostrarSenha }) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (mostrarSenha) R.drawable.logo_background else R.drawable.logo_background
+                                ),
+                                contentDescription = "Toggle password visibility",
+                                tint = primaryColor
+                            )
+                        }
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = cardBackground,
+                        unfocusedContainerColor = cardBackground,
+                        focusedTextColor = textColorDark,
+                        unfocusedTextColor = textColorDark,
+                        focusedLabelColor = primaryColor,
+                        unfocusedLabelColor = Color.Gray,
+                        focusedIndicatorColor = primaryColor
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -562,8 +526,8 @@ fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1976D2),
-                        contentColor = Color.White
+                        containerColor = primaryColor,
+                        contentColor = textColor
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -572,13 +536,13 @@ fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Botão Esqueceu a senha
+                // Botão Cadastre-se
                 TextButton(onClick = {
                     onRegisterClick()
                 }) {
                     Text(
-                        "Esqueceu a senha?",
-                        color = Color(0xFF1976D2),
+                        "Não tem conta? Cadastre-se",
+                        color = primaryColor,
                         fontSize = 14.sp
                     )
                 }
@@ -587,13 +551,32 @@ fun LoginScreen(onLogin: (String) -> Unit, onRegisterClick: () -> Unit) {
     }
 }
 
-
 @Preview
 @Composable
 fun AppPreview() {
     TemplateLoginTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            App()
+            LoginScreen(onLogin = {}, onRegisterClick = {})
+        }
+    }
+}
+
+@Preview
+@Composable
+fun RegisterPreview() {
+    TemplateLoginTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            RegisterScreen(onRegisterComplete = {}, onLoginClick = {})
+        }
+    }
+}
+
+@Preview
+@Composable
+fun HomePreview() {
+    TemplateLoginTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            HomeScreen("Usuário Teste")
         }
     }
 }
